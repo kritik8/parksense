@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Data files (large)
+data/raw/*.csv
+data/raw/*.zip
+data/processed/*.parquet
+*.pkl
+*.h5
+*.model
+
+# ML artifacts
+models/*.pkl
+models/*.joblib
+
+# Node
+node_modules/
+.next/
+dist/
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+*.log

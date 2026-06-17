@@ -1,0 +1,75 @@
+/* ParkSense AI — Design System
+   Owner: frontend-dashboard branch (Mayank)
+*/
+
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --bg-card-hover: #1f2a42;
+  --accent-cyan: #00d4ff;
+  --accent-purple: #7c3aed;
+  --accent-green: #00c853;
+  --accent-yellow: #ffd600;
+  --accent-orange: #ff6d00;
+  --accent-red: #d50000;
+  --text-primary: #f0f4ff;
+  --text-secondary: #8892a4;
+  --border: rgba(255, 255, 255, 0.08);
+  --font: 'Inter', sans-serif;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* CIS color utility classes */
+.cis-clear    { color: var(--accent-green);  }
+.cis-low      { color: #aeea00; }
+.cis-moderate { color: var(--accent-yellow); }
+.cis-high     { color: var(--accent-orange); }
+.cis-critical { color: var(--accent-red);    }
+
+.badge-clear    { background: #00c85320; border: 1px solid #00c85360; color: var(--accent-green); }
+.badge-low      { background: #aeea0020; border: 1px solid #aeea0060; color: #aeea00; }
+.badge-moderate { background: #ffd60020; border: 1px solid #ffd60060; color: var(--accent-yellow); }
+.badge-high     { background: #ff6d0020; border: 1px solid #ff6d0060; color: var(--accent-orange); }
+.badge-critical { background: #d5000020; border: 1px solid #d5000060; color: var(--accent-red); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
