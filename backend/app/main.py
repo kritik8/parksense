@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.violations import router as violations_router
 from app.routes.stats      import router as stats_router
+from app.routes.hotspots   import router as hotspots_router
+from app.routes.heatmap    import router as heatmap_router
 
 app = FastAPI(
     title="ParkSense AI",
@@ -27,22 +29,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Implemented routers ────────────────────────────────────────────────────
+# ── Implemented routers ───────────────────────────────────────────────
 app.include_router(violations_router, prefix="/api", tags=["Violations"])
 app.include_router(stats_router,      prefix="/api", tags=["Stats"])
+app.include_router(hotspots_router,   prefix="/api", tags=["Hotspots"])
+app.include_router(heatmap_router,    prefix="/api", tags=["Heatmap"])
 
 # ── Stub routers (Day 2-3 work) ────────────────────────────────────────────
 from fastapi import APIRouter
 
 _stubs = APIRouter()
-
-@_stubs.get("/hotspots",          summary="[STUB] Ranked hotspot clusters")
-def get_hotspots():
-    return {"message": "stub — implement Day 2 (backend-api + backend-geo-engine)"}
-
-@_stubs.get("/heatmap",           summary="[STUB] H3 heatmap grid")
-def get_heatmap():
-    return {"message": "stub — implement Day 2"}
 
 @_stubs.get("/offenders",         summary="[STUB] Repeat offender rankings")
 def get_offenders():

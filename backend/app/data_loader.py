@@ -19,6 +19,7 @@ BASE_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
 PROCESSED_DIR = os.path.join(BASE_DIR, "data", "processed")
 RAW_PATH     = os.path.join(BASE_DIR, "data", "raw", "violations.csv")
 MOCK_PATH    = os.path.join(BASE_DIR, "data", "mock", "violations_mock.csv")
+SCORED_PATH  = os.path.join(BASE_DIR, "data", "processed", "violations_scored.parquet")
 
 
 # Columns we actually use — keeps memory lean
@@ -114,4 +115,28 @@ def load_violations(force_raw: bool = False) -> pd.DataFrame:
     df["hour"]        = df["timestamp"].dt.hour
     df["day_of_week"] = df["timestamp"].dt.dayofweek
     df["is_weekend"]  = df["day_of_week"].isin([5, 6]).astype(int)
+    return df
+
+
+def load_scored_violations(force_rescore: bool = False) -> pd.DataFrame:
+    """
+    Load violations with CIS scores pre-computed.
+    Uses a separate Parquet cache (violations_scored.parquet).
+    On first call, runs score_dataframe() which takes ~20-30s for 298K rows.
+
+    Args:
+        force_rescore: if True, recompute CIS even if cache exists.
+    """
+    if not force_rescore and os.path.exists(SCORED_PATH):
+        df = pd.read_parquet(SCORED_PATH)
+        print(f"[INFO] Loaded {len(df):,} scored violations from cache.")
+        return df
+
+    print("[INFO] Computing CIS scores for all violations (~20-30s)...")
+    # Import here to avoid circular import at module level
+    from app.cis_batch import score_dataframe
+    df = load_violations()
+    df = score_dataframe(df)
+    df.to_parquet(SCORED_PATH, index=False)
+    print(f"[INFO] Scored {len(df):,} violations. Cached to {SCORED_PATH}")
     return df
