@@ -36,15 +36,23 @@ ROAD_CLASS_LANES = {
 }
 
 
-def build_graph(force_rebuild: bool = False):
+def build_graph(force_rebuild: bool = False, place_name: str = "Bengaluru, India"):
     """
-    Download Bengaluru drive network from OSM and compute edge centrality.
-    Saves graph to GRAPH_CACHE for reuse.
+    Download road network from OSM for a given place and compute edge centrality.
+    Saves graph to a cache file for reuse.
 
     Falls back to a tiny mock graph if osmnx is unavailable or download fails.
     """
-    if not force_rebuild and os.path.exists(GRAPH_CACHE):
-        with open(GRAPH_CACHE, "rb") as f:
+    if place_name == "Bengaluru, India":
+        cache_path = GRAPH_CACHE
+    else:
+        safe_place_name = "".join([c if c.isalnum() else "_" for c in place_name])
+        cache_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "data", "processed", f"{safe_place_name}_graph.pkl"
+        )
+
+    if not force_rebuild and os.path.exists(cache_path):
+        with open(cache_path, "rb") as f:
             return pickle.load(f)
 
     if not OSMNX_AVAILABLE:
@@ -52,8 +60,8 @@ def build_graph(force_rebuild: bool = False):
         return _mock_graph()
 
     try:
-        print("[INFO] Downloading Bengaluru road network from OSM...")
-        G = ox.graph_from_place("Bengaluru, India", network_type="drive")
+        print(f"[INFO] Downloading {place_name} road network from OSM...")
+        G = ox.graph_from_place(place_name, network_type="drive")
         G = ox.add_edge_speeds(G)
         G = ox.add_edge_travel_times(G)
 
@@ -66,19 +74,20 @@ def build_graph(force_rebuild: bool = False):
                 data["lanes"] = ROAD_CLASS_LANES.get(rc, 2)
 
         # Edge betweenness centrality (normalised 0-1)
-        print("[INFO] Computing edge betweenness centrality (slow, ~5-10 min)...")
-        centrality = nx.edge_betweenness_centrality(G, normalized=True)
+        print(f"[INFO] Computing edge betweenness centrality for {place_name} (using approximation k=5000)...")
+        k_val = min(5000, len(G))
+        centrality = nx.edge_betweenness_centrality(G, k=k_val, normalized=True, seed=42)
         nx.set_edge_attributes(G, centrality, "betweenness_centrality")
 
-        os.makedirs(os.path.dirname(GRAPH_CACHE), exist_ok=True)
-        with open(GRAPH_CACHE, "wb") as f:
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        with open(cache_path, "wb") as f:
             pickle.dump(G, f)
 
-        print(f"[INFO] Graph cached to {GRAPH_CACHE}")
+        print(f"[INFO] Graph cached to {cache_path}")
         return G
 
     except Exception as e:
-        print(f"[ERROR] OSM download failed: {e}\nFalling back to mock graph.")
+        print(f"[ERROR] OSM download failed for {place_name}: {e}\nFalling back to mock graph.")
         return _mock_graph()
 
 
@@ -139,3 +148,55 @@ def deterrence_decay(hours_since_patrol: float, half_life_hours: float = 6.0) ->
     """
     import math
     return 1.0 - math.exp(-0.693 * hours_since_patrol / half_life_hours)
+
+
+def schedule_patrols(hotspots: list[dict], current_time_str: str = None) -> list[dict]:
+    """
+    Computes priority score for patrol units based on hotspot CIS score and deterrence decay.
+    
+    Each hotspot dict should have keys:
+      - 'hotspot_id'
+      - 'cis_score'
+      - 'last_patrolled' (ISO timestamp string or None)
+      
+    Returns a sorted list of hotspots with 'hours_since_patrol', 'deterrence_decay_factor',
+    'patrol_priority_score', and 'needs_revisit'.
+    """
+    import datetime
+    
+    if current_time_str:
+        try:
+            current_time = datetime.datetime.fromisoformat(current_time_str.replace("Z", "+00:00"))
+        except ValueError:
+            current_time = datetime.datetime.utcnow()
+    else:
+        current_time = datetime.datetime.utcnow()
+        
+    scheduled = []
+    for hs in hotspots:
+        last_patrolled_str = hs.get("last_patrolled")
+        if last_patrolled_str:
+            try:
+                last_time = datetime.datetime.fromisoformat(last_patrolled_str.replace("Z", "+00:00"))
+                # Make naive/aware datetimes match
+                if current_time.tzinfo != last_time.tzinfo:
+                    current_time = current_time.replace(tzinfo=last_time.tzinfo)
+                hours_since = (current_time - last_time).total_seconds() / 3600.0
+            except ValueError:
+                hours_since = 24.0  # fallback
+        else:
+            hours_since = 24.0  # treat as unpatrolled (full decay)
+            
+        hours_since = max(0.0, hours_since)
+        decay = deterrence_decay(hours_since)
+        priority_score = round(hs.get("cis_score", 0.0) * decay, 2)
+        
+        scheduled.append({
+            **hs,
+            "hours_since_patrol": round(hours_since, 2),
+            "deterrence_decay_factor": round(decay, 3),
+            "patrol_priority_score": priority_score,
+            "needs_revisit": decay > 0.5
+        })
+        
+    return sorted(scheduled, key=lambda x: x["patrol_priority_score"], reverse=True)
