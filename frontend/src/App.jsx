@@ -1,72 +1,229 @@
 /**
- * ParkSense AI — Root App Component
- * Owner: frontend-dashboard branch (Mayank)
+ * ParkSense AI — Root Application Component
+ * Owner: localWorkspace branch (Mayank)
  *
- * Placeholder shell — wire up real components in frontend-dashboard branch.
- * Components to build:
- *   src/components/MapView.jsx        ← Leaflet map + heatmap
- *   src/components/HotspotPanel.jsx   ← Right sidebar, ranked hotspots
- *   src/components/FilterPanel.jsx    ← Left sidebar, filters
- *   src/components/StatsBar.jsx       ← Bottom stats bar
- *   src/components/AnalyticsPanel.jsx ← Charts (Recharts)
- *   src/components/ChalllanPanel.jsx  ← Dynamic challan UI
- *   src/components/ParkFlowSim.jsx    ← What-if simulation UI (OPTIONAL)
- *   src/components/OffendersTable.jsx ← Repeat offenders page
+ * Layout:
+ *   DashboardHeader
+ *   StatsBar
+ *   ┌─────────────┬─────────────────────────────┬────────────────┐
+ *   │ FilterSidebar│ TrafficMap + TimeSlider     │ HotspotList   │
+ *   └─────────────┴─────────────────────────────┴────────────────┘
+ *   AnalyticsBottom (tabs: CIS Trend | Vehicle Dist | Predictions | Offenders | Challan)
+ *
+ * Filter state is managed here and flows down to all components.
+ * API hooks are called here and data is distributed to children.
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import './App.css'
 
-const API_BASE = '/api'
+// Leaflet CSS is loaded via CDN <link> in index.html
+// leaflet.heat is loaded via CDN <script> in index.html
 
-function App() {
-  const [stats, setStats] = useState(null)
+// Layout
+import { DashboardHeader } from './components/layout/DashboardHeader'
+import { StatsBar }        from './components/layout/StatsBar'
 
-  useEffect(() => {
-    fetch(`${API_BASE}/stats`)
-      .then(r => r.json())
-      .then(setStats)
-      .catch(() => setStats({ message: 'API not running — start backend first.' }))
+// Panels
+import { FilterSidebar }        from './components/filters/FilterSidebar'
+import { HotspotList }          from './components/hotspots/HotspotList'
+import { TrafficMapWithControls } from './components/map/TrafficMap'
+
+// Analytics bottom tabs
+import { CISTrendChart }          from './components/charts/CISTrendChart'
+import { VehicleDistChart }       from './components/charts/VehicleDistChart'
+import { PredictionList }         from './components/predictions/PredictionList'
+import { RepeatOffendersTable }   from './components/offenders/RepeatOffendersTable'
+import { ChallanPanel }           from './components/challan/ChallanPanel'
+
+// Hooks
+import {
+  useStats, useHotspots, useHeatmap, useViolations,
+  usePredictions, useOffenders,
+} from './hooks/useDashboard'
+
+
+
+// ── Initial filter state ───────────────────────────────────────────────────
+const DEFAULT_FILTERS = {
+  hour_start:     null,
+  hour_end:       null,
+  vehicle_type:   '',
+  violation_type: '',
+  police_station: '',
+}
+
+// ── Analytics tabs ──────────────────────────────────────────────────────────
+const TABS = [
+  { id: 'trend',       label: '📈 CIS Trend'      },
+  { id: 'vehicles',    label: '🚗 Vehicle Mix'     },
+  { id: 'predictions', label: '🔮 Upcoming Hotspots' },
+  { id: 'offenders',   label: '👮 Repeat Offenders' },
+  { id: 'challan',     label: '⚖️ Challan'          },
+]
+
+// ── Main App ────────────────────────────────────────────────────────────────
+export default function App() {
+  // Filter state (lifted up — shared across sidebar, map, hotspots)
+  const [filters, setFilters] = useState(DEFAULT_FILTERS)
+
+  // Map state
+  const [selectedHotspot, setSelectedHotspot] = useState(null)
+  const [sliderHour, setSliderHour]           = useState(new Date().getHours())
+
+  // Analytics tab
+  const [activeTab, setActiveTab] = useState('trend')
+
+  // Build API filter params from UI filter state + slider hour
+  const apiFilters = useMemo(() => ({
+    ...(filters.hour_start !== null ? { hour_start: filters.hour_start } : {}),
+    ...(filters.hour_end   !== null ? { hour_end:   filters.hour_end   } : {}),
+    ...(filters.vehicle_type   ? { vehicle_type:   filters.vehicle_type   } : {}),
+    ...(filters.violation_type ? { violation_type: filters.violation_type } : {}),
+    ...(filters.police_station ? { police_station: filters.police_station } : {}),
+  }), [filters])
+
+  // ── Data hooks ────────────────────────────────────────────────────────────
+  const statsResult     = useStats()
+  const hotspotsResult  = useHotspots({ ...apiFilters, limit: 20 })
+  const heatmapResult   = useHeatmap({ ...apiFilters, top_n: 300 })
+  const violationsResult= useViolations({ ...apiFilters, limit: 500 })
+  const predictResult   = usePredictions({ hour: sliderHour, limit: 10 })
+  const offendersResult = useOffenders(20)
+
+  const stats      = statsResult.data
+  const hotspots   = hotspotsResult.data?.hotspots    ?? []
+  const heatmapCells = heatmapResult.data?.cells      ?? []
+  const violations = violationsResult.data?.data       ?? []
+  const predictions= predictResult.data?.predictions   ?? []
+  const offenders  = offendersResult.data?.offenders   ?? []
+
+  // Any hook using mock → show banner
+  const usingMock = statsResult.usingMock || hotspotsResult.usingMock
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleFiltersChange = useCallback((newFilters) => {
+    setFilters(newFilters)
+    setSelectedHotspot(null) // reset selection when filters change
   }, [])
 
+  const handleHotspotSelect = useCallback((hs) => {
+    setSelectedHotspot(prev => prev?.hotspot_id === hs.hotspot_id ? null : hs)
+  }, [])
+
+  const handleHourChange = useCallback((h) => {
+    setSliderHour(typeof h === 'function' ? h(sliderHour) : h)
+  }, [sliderHour])
+
+  const handleRefresh = useCallback(() => {
+    statsResult.refetch()
+    hotspotsResult.refetch()
+    heatmapResult.refetch()
+    violationsResult.refetch()
+  }, [statsResult, hotspotsResult, heatmapResult, violationsResult])
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <div className="header-logo">
-          <span className="logo-icon">🅿️</span>
-          <span className="logo-text">ParkSense <strong>AI</strong></span>
-        </div>
-        <div className="header-subtitle">Bengaluru Traffic Command Center</div>
-        <div className="header-status">
-          <span className="status-dot" />
-          Live
-        </div>
-      </header>
+      {/* Header */}
+      <DashboardHeader
+        lastUpdated={stats?.date_range?.max}
+        onRefresh={handleRefresh}
+      />
 
-      <main className="app-main">
-        {/* TODO (Mayank): Replace this placeholder with real components */}
-        <div className="placeholder-dashboard">
-          <div className="placeholder-map">
-            🗺️ Leaflet Map — build in MapView.jsx
+      {/* Stats Bar */}
+      <StatsBar stats={stats} loading={statsResult.loading} />
+
+      {/* Main body: filters | map | hotspots */}
+      <div className="app-body">
+        {/* Left: Filters */}
+        <FilterSidebar
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          policeStations={stats?.top_police_stations ?? []}
+        />
+
+        {/* Centre: Map + Analytics bottom */}
+        <div className="map-analytics-col">
+          {/* Map */}
+          <div className="map-wrapper">
+            <TrafficMapWithControls
+              heatmapCells={heatmapCells}
+              hotspots={hotspots}
+              violations={violations}
+              selectedHotspot={selectedHotspot}
+              onHotspotClick={handleHotspotSelect}
+              hour={sliderHour}
+              onHourChange={handleHourChange}
+            />
           </div>
-          <div className="placeholder-sidebar">
-            <div className="card" style={{ marginBottom: 12 }}>
-              <h3>🔥 Hotspot Rankings</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
-                Build in HotspotPanel.jsx
-              </p>
+
+          {/* Analytics tabs — bottom panel */}
+          <div className="analytics-bottom">
+            {/* Tab bar */}
+            <div className="tab-nav" role="tablist">
+              {TABS.map(tab => (
+                <button
+                  key={tab.id}
+                  id={`tab-${tab.id}`}
+                  className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`tabpanel-${tab.id}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            <div className="card">
-              <h3>📊 API Status</h3>
-              <pre style={{ fontSize: 12, marginTop: 8, color: 'var(--accent-cyan)', whiteSpace: 'pre-wrap' }}>
-                {JSON.stringify(stats, null, 2)}
-              </pre>
+
+            {/* Tab content */}
+            <div className="analytics-tab-content" role="tabpanel" id={`tabpanel-${activeTab}`}>
+              <div style={{ flex: 1, padding: '8px 12px', overflow: 'hidden', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                {activeTab === 'trend' && (
+                  <CISTrendChart
+                    data={stats?.hourly_distribution ?? []}
+                    loading={statsResult.loading}
+                  />
+                )}
+                {activeTab === 'vehicles' && (
+                  <VehicleDistChart
+                    data={stats?.top_vehicle_types ?? []}
+                    loading={statsResult.loading}
+                  />
+                )}
+                {activeTab === 'predictions' && (
+                  <PredictionList
+                    predictions={predictions}
+                    loading={predictResult.loading}
+                  />
+                )}
+                {activeTab === 'offenders' && (
+                  <RepeatOffendersTable
+                    offenders={offenders}
+                    loading={offendersResult.loading}
+                  />
+                )}
+                {activeTab === 'challan' && (
+                  <ChallanPanel
+                    selectedViolationId={
+                      selectedHotspot?.violation_ids_sample?.[0] ?? ''
+                    }
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </main>
+
+        {/* Right: Hotspot List */}
+        <HotspotList
+          hotspots={hotspots}
+          loading={hotspotsResult.loading}
+          selectedId={selectedHotspot?.hotspot_id}
+          onSelect={handleHotspotSelect}
+        />
+      </div>
     </div>
   )
 }
-
-export default App
