@@ -179,6 +179,9 @@ def predict_next_2h(h3_cells: list[str], current_hour: int, day_of_week: int) ->
             for cell in h3_cells[:10]
         ]
 
+    # Align current_hour to the 2-hour training grid (even hours)
+    current_hour = (current_hour // 2) * 2
+
     with open(MODEL_PATH, "rb") as f:
         model_data = pickle.load(f)
 
@@ -214,7 +217,8 @@ def predict_next_2h(h3_cells: list[str], current_hour: int, day_of_week: int) ->
             "hist_avg_cis": hist_avg
         })
 
-    X = pd.DataFrame(rows)
+    features = ["h3_cell_hash", "hour", "day_of_week", "is_weekend", "count_lag_1", "count_lag_2", "count_lag_12", "hist_avg_cis"]
+    X = pd.DataFrame(rows)[features]
     preds = model.predict(X)
     
     return [

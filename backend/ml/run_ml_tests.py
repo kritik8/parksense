@@ -48,9 +48,9 @@ def run_tests():
 
     # 4. Predict
     print("\n[STEP 4] Testing predict_next_2h...")
-    test_cells = list(feat_df["h3_cell"].unique()[:5])
-    print(f"Testing predictions for cells: {test_cells}")
-    preds = predict_next_2h(test_cells, current_hour=14, day_of_week=2)
+    test_cells = list(feat_df["h3_cell"].value_counts().head(5).index)
+    print(f"Testing predictions for top 5 active cells: {test_cells}")
+    preds = predict_next_2h(test_cells, current_hour=9, day_of_week=0)
     print("Predictions output:")
     for p in preds:
         print(f"  Cell: {p['h3_cell']} -> Predicted Count: {p['predicted_count']}, Confidence: {p['confidence']}")
