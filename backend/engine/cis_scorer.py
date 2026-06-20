@@ -63,7 +63,12 @@ def capacity_reduction_factor(road_class: str, lanes: int = None) -> float:
     Represents the fractional capacity removed by ONE blocked lane.
     Falls back to road-class default if OSM lanes tag is missing.
     """
-    n = lanes if lanes else ROAD_CLASS_LANES.get(road_class, 2)
+    try:
+        n = int(lanes) if lanes else ROAD_CLASS_LANES.get(road_class, 2)
+        if n <= 0:
+            n = 2
+    except (ValueError, TypeError):
+        n = ROAD_CLASS_LANES.get(road_class, 2)
     return 1.0 / n
 
 
@@ -78,10 +83,16 @@ def bpr_delay(volume_capacity_ratio: float, alpha: float = 0.15, beta: float = 4
 
 
 def temporal_weight(hour: int) -> float:
-    return TEMPORAL_WEIGHT.get(hour % 24, 1.0)
+    try:
+        h = int(hour)
+    except (ValueError, TypeError):
+        h = 12
+    return TEMPORAL_WEIGHT.get(h % 24, 1.0)
 
 
 def blockage_factor(vehicle_type: str) -> float:
+    if not isinstance(vehicle_type, str):
+        vehicle_type = str(vehicle_type) if vehicle_type is not None else "UNKNOWN"
     return BLOCKAGE_FACTOR.get(vehicle_type.upper().strip(), 0.20)
 
 
