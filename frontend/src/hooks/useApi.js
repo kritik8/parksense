@@ -13,13 +13,22 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 export function useApi(fetchFn, deps = [], fallback = null, onError = null) {
+  const forceMock = import.meta.env.VITE_USE_MOCK === 'true'
   const [data, setData] = useState(fallback)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [usingMock, setUsingMock] = useState(false)
+  const [usingMock, setUsingMock] = useState(forceMock)
   const mountedRef = useRef(true)
 
   const fetch_ = useCallback(async () => {
+    if (forceMock) {
+      setData(fallback)
+      setUsingMock(true)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {

@@ -38,7 +38,7 @@ function DigitalClock() {
   )
 }
 
-export function DashboardHeader({ lastUpdated, onRefresh }) {
+export function DashboardHeader({ lastUpdated, onRefresh, usingMock }) {
   return (
     <header className="app-header">
       {/* Logo */}
@@ -88,10 +88,33 @@ export function DashboardHeader({ lastUpdated, onRefresh }) {
           &#8634; Refresh
         </button>
 
-        <div className="live-badge">
-          <span className="live-dot" />
-          Live
-        </div>
+        {usingMock ? (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            background: 'var(--bg-input)',
+            padding: '4px 10px',
+            borderRadius: 20,
+            border: '1px solid var(--border)',
+          }}>
+            <span style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: 'var(--text-secondary)',
+            }} />
+            Demo Mode
+          </div>
+        ) : (
+          <div className="live-badge">
+            <span className="live-dot" />
+            Live
+          </div>
+        )}
       </div>
     </header>
   )

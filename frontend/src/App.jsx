@@ -167,6 +167,7 @@ export default function App() {
       <DashboardHeader
         lastUpdated={stats?.date_range?.max}
         onRefresh={handleRefresh}
+        usingMock={usingMock}
       />
 
       {/* Stats Bar */}
