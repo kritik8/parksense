@@ -4,13 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ParkSense AI — Bengaluru Traffic Command Center</title>
-    <meta name="description" content="AI-powered parking violation impact scoring engine for Bengaluru. Real-time congestion heatmaps, hotspot rankings, and dynamic challan recommendations." />
+    <meta name="description" content="AI-powered parking violation impact scoring engine for Bengaluru. Real-time congestion heatmaps, hotspot rankings, dynamic challan recommendations, and enforcement analytics." />
+    <meta name="keywords" content="parking violation, Bengaluru traffic, CIS score, congestion impact, smart city" />
+    <meta name="theme-color" content="#1d4ed8" />
+
+    <!-- Preconnect for fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Leaflet CSS (also loaded in App.jsx import, belt-and-suspenders) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🅿️</text></svg>" />
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- leaflet.heat — loaded after Leaflet via CDN -->
+    <!-- Must come before the React bundle which imports react-leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
