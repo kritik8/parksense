@@ -22,10 +22,10 @@
 import React, { useEffect, useRef, useCallback } from 'react'
 import {
   MapContainer, TileLayer, CircleMarker,
-  Popup, useMap, Marker,
+  Popup, useMap, Marker, Polygon, Tooltip
 } from 'react-leaflet'
 import L from 'leaflet'
-import { getCISHex, HEATMAP_GRADIENT, getEnforcementAction } from '../../utils/cis'
+import { getCISHex, getEnforcementAction } from '../../utils/cis'
 import { formatNumber, vehicleLabel } from '../../utils/format'
 import { CISBadge } from '../common'
 import { CISLegend } from './CISLegend'
@@ -35,37 +35,42 @@ import { TimeSlider } from './TimeSlider'
 const BENGALURU_CENTER = [12.9716, 77.5946]
 const DEFAULT_ZOOM = 12
 
-// ── Heatmap Layer (uses leaflet.heat) ─────────────────────────────────────
-function HeatmapLayer({ cells = [] }) {
-  const map = useMap()
-  const layerRef = useRef(null)
-
-  useEffect(() => {
-    if (!map || !window.L?.heatLayer) return
-    if (layerRef.current) {
-      map.removeLayer(layerRef.current)
-    }
-
-    const points = cells.map(c => [c.latitude, c.longitude, c.intensity ?? 0.5])
-    if (points.length === 0) return
-
-    layerRef.current = window.L.heatLayer(points, {
-      radius: 35,
-      blur: 25,
-      maxZoom: 15,
-      max: 1.0,
-      gradient: HEATMAP_GRADIENT,
-      minOpacity: 0.3,
-    }).addTo(map)
-
-    return () => {
-      if (layerRef.current && map) {
-        try { map.removeLayer(layerRef.current) } catch { }
-      }
-    }
-  }, [map, cells])
-
-  return null
+// ── Hexagonal Grid Layer (shades coordinates like AQI maps) ───────────────
+function HexagonalGridLayer({ cells = [] }) {
+  return (
+    <>
+      {cells.map(cell => (
+        cell.boundary ? (
+          <Polygon
+            key={cell.cell_id}
+            positions={cell.boundary}
+            pathOptions={{
+              fillColor: getCISHex(cell.avg_cis),
+              fillOpacity: 0.4,
+              color: 'rgba(255, 255, 255, 0.45)',
+              weight: 0.5,
+            }}
+            eventHandlers={{
+              mouseover: (e) => {
+                e.target.setStyle({ fillOpacity: 0.65, weight: 1.2, color: '#ffffff' });
+              },
+              mouseout: (e) => {
+                e.target.setStyle({ fillOpacity: 0.4, weight: 0.5, color: 'rgba(255, 255, 255, 0.45)' });
+              }
+            }}
+          >
+            <Tooltip sticky>
+              <div style={{ fontFamily: 'var(--font)', fontSize: 11, padding: '2px 4px' }}>
+                <strong>Zone: {cell.cell_id}</strong><br />
+                Avg CIS: <strong style={{ color: getCISHex(cell.avg_cis) }}>{Math.round(cell.avg_cis)}</strong> ({cell.cis_label})<br />
+                Violations: <strong>{cell.violation_count}</strong>
+              </div>
+            </Tooltip>
+          </Polygon>
+        ) : null
+      ))}
+    </>
+  )
 }
 
 // ── Fly-to selected hotspot ────────────────────────────────────────────────
@@ -174,15 +179,16 @@ export function TrafficMap({
         zoomControl={false}
         id="parksense-map"
       >
-        {/* Base tile */}
+        {/* Base tile (CartoDB Positron - Premium Minimal Light) */}
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='© <a href="https://openstreetmap.org">OpenStreetMap</a>'
-          maxZoom={19}
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          subdomains="abcd"
+          maxZoom={20}
         />
 
-        {/* CIS Heatmap overlay */}
-        <HeatmapLayer cells={heatmapCells} />
+        {/* CIS Heatmap overlay (Solid H3 Hexagonal polygons) */}
+        <HexagonalGridLayer cells={heatmapCells} />
 
         {/* Fly to selected hotspot */}
         {selectedHotspot && <FlyToHotspot hotspot={selectedHotspot} />}
@@ -301,11 +307,12 @@ export function TrafficMapWithControls(props) {
         id="parksense-map"
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='© <a href="https://openstreetmap.org">OpenStreetMap</a>'
-          maxZoom={19}
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          subdomains="abcd"
+          maxZoom={20}
         />
-        <HeatmapLayer cells={props.heatmapCells ?? []} />
+        <HexagonalGridLayer cells={props.heatmapCells ?? []} />
         {props.selectedHotspot && <FlyToHotspot hotspot={props.selectedHotspot} />}
 
         {(props.violations ?? []).slice(0, 400).map((v, i) => (

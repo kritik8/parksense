@@ -20,12 +20,12 @@ export function getCISClass(score) {
 
 /** Returns the map hex color for the CIS score (for Leaflet markers / heatmap) */
 export function getCISHex(score) {
-  if (score === null || score === undefined) return '#9ca3af'
-  if (score >= 81) return '#d50000'
-  if (score >= 61) return '#ff6d00'
-  if (score >= 41) return '#ffd600'
-  if (score >= 21) return '#aeea00'
-  return '#00c853'
+  if (score === null || score === undefined) return '#8e8e93' // iOS Gray
+  if (score >= 81) return '#ff3b30' // iOS Red
+  if (score >= 61) return '#ff9500' // iOS Orange
+  if (score >= 41) return '#ffcc00' // iOS Yellow
+  if (score >= 21) return '#a6e22e' // Pastel Lime
+  return '#34c759' // iOS Green
 }
 
 /** Returns a CSS rgba string with the given opacity for backgrounds */
@@ -37,30 +37,30 @@ export function getCISBg(score, alpha = 0.12) {
 /** Returns border color hex */
 export function getCISBorder(score) {
   if (score === null || score === undefined) return '#e5e7eb'
-  if (score >= 81) return '#fecaca'
-  if (score >= 61) return '#fed7aa'
-  if (score >= 41) return '#fde047'
-  if (score >= 21) return '#d9f99d'
-  return '#bbf7d0'
+  if (score >= 81) return '#ffb3b0'
+  if (score >= 61) return '#ffd1a4'
+  if (score >= 41) return '#ffeaa7'
+  if (score >= 21) return '#d3f2d3'
+  return '#c2eed0'
 }
 
 /** Returns the Leaflet heatmap gradient config */
 export const HEATMAP_GRADIENT = {
-  0.0: '#00c853',
-  0.2: '#aeea00',
-  0.4: '#ffd600',
-  0.6: '#ff6d00',
-  0.8: '#d50000',
-  1.0: '#7b0000',
+  0.0: '#34c759',
+  0.2: '#a6e22e',
+  0.4: '#ffcc00',
+  0.6: '#ff9500',
+  0.8: '#ff3b30',
+  1.0: '#bf261f',
 }
 
 /** CIS legend bands */
 export const CIS_LEGEND = [
-  { range: '81–100', label: 'Critical',   hex: '#d50000', class: 'critical' },
-  { range: '61–80',  label: 'High Impact',hex: '#ff6d00', class: 'high'     },
-  { range: '41–60',  label: 'Moderate',   hex: '#ffd600', class: 'moderate' },
-  { range: '21–40',  label: 'Low Impact', hex: '#aeea00', class: 'low'      },
-  { range: '0–20',   label: 'Clear',      hex: '#00c853', class: 'clear'    },
+  { range: '81–100', label: 'Critical',   hex: '#ff3b30', class: 'critical' },
+  { range: '61–80',  label: 'High Impact',hex: '#ff9500', class: 'high'     },
+  { range: '41–60',  label: 'Moderate',   hex: '#ffcc00', class: 'moderate' },
+  { range: '21–40',  label: 'Low Impact', hex: '#a6e22e', class: 'low'      },
+  { range: '0–20',   label: 'Clear',      hex: '#34c759', class: 'clear'    },
 ]
 
 /** Returns recommended enforcement action string */

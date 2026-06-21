@@ -105,10 +105,12 @@ def get_heatmap(
         # h3 4.x: cell_to_latlng returns (lat, lng)
         lat, lng = h3.cell_to_latlng(cell)
         avg = round(float(row["avg_cis"]), 2)
+        boundary = [[round(pt[0], 6), round(pt[1], 6)] for pt in h3.cell_to_boundary(cell)]
         cells.append({
             "cell_id":         cell,
             "latitude":        round(lat, 6),
             "longitude":       round(lng, 6),
+            "boundary":        boundary,
             "violation_count": int(row["violation_count"]),
             "total_cis":       round(float(row["total_cis"]), 2),
             "avg_cis":         avg,

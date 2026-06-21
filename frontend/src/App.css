@@ -19,9 +19,10 @@
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   z-index: 100;
 }
 
@@ -33,7 +34,9 @@
   align-items: center;
   gap: 0;
   padding: 0 16px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
 }
@@ -50,7 +53,9 @@
 .filter-sidebar {
   width: 236px;
   flex-shrink: 0;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -89,7 +94,9 @@
 .hotspot-sidebar {
   width: 296px;
   flex-shrink: 0;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -101,7 +108,9 @@
 .analytics-cell {
   flex: 1;
   border-right: 1px solid var(--border);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 12px 16px;
   overflow: hidden;
   display: flex;
@@ -562,7 +571,9 @@
 .analytics-bottom {
   height: 190px;
   flex-shrink: 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;

@@ -3,75 +3,76 @@
    Owner: localWorkspace branch (Mayank)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
   /* ── Backgrounds ─────────────────────────────────────────── */
-  --bg-page: #f0f2f7;
+  --bg-page: #f5f6fa;
   --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8faff;
-  --bg-sidebar: #f5f7fb;
-  --bg-input: #f3f4f6;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --bg-sidebar: rgba(248, 249, 252, 0.8);
+  --bg-input: rgba(142, 142, 147, 0.12);
 
-  /* ── Primary Accent — Blue ───────────────────────────────── */
-  --blue-900: #1e3a8a;
-  --blue-700: #1d4ed8;
-  --blue-600: #2563eb;
-  --blue-500: #3b82f6;
-  --blue-100: #dbeafe;
-  --blue-50: #eff6ff;
+  /* ── Primary Accent — Apple/iOS Blue ──────────────────────── */
+  --blue-900: #0040dd;
+  --blue-700: #0055ff;
+  --blue-600: #007aff;
+  --blue-500: #0a84ff;
+  --blue-100: rgba(0, 122, 255, 0.15);
+  --blue-5: rgba(0, 122, 255, 0.05);
+  --blue-50: rgba(0, 122, 255, 0.08);
 
-  /* ── CIS Impact Colors ────────────────────────────────────── */
-  --cis-green: #16a34a;
-  --cis-green-bg: #f0fdf4;
-  --cis-green-border: #bbf7d0;
-  --cis-lime: #65a30d;
-  --cis-lime-bg: #f7fee7;
-  --cis-lime-border: #d9f99d;
-  --cis-yellow: #ca8a04;
-  --cis-yellow-bg: #fefce8;
-  --cis-yellow-border: #fde047;
-  --cis-orange: #ea580c;
-  --cis-orange-bg: #fff7ed;
-  --cis-orange-border: #fed7aa;
-  --cis-red: #dc2626;
-  --cis-red-bg: #fef2f2;
-  --cis-red-border: #fecaca;
+  /* ── CIS Impact Colors (Apple System / Pastel) ───────────── */
+  --cis-green: #34c759;
+  --cis-green-bg: rgba(52, 199, 89, 0.1);
+  --cis-green-border: rgba(52, 199, 89, 0.2);
+  --cis-lime: #a6e22e;
+  --cis-lime-bg: rgba(166, 226, 46, 0.1);
+  --cis-lime-border: rgba(166, 226, 46, 0.2);
+  --cis-yellow: #ffcc00;
+  --cis-yellow-bg: rgba(255, 204, 0, 0.1);
+  --cis-yellow-border: rgba(255, 204, 0, 0.2);
+  --cis-orange: #ff9500;
+  --cis-orange-bg: rgba(255, 149, 0, 0.1);
+  --cis-orange-border: rgba(255, 149, 0, 0.2);
+  --cis-red: #ff3b30;
+  --cis-red-bg: rgba(255, 59, 48, 0.1);
+  --cis-red-border: rgba(255, 59, 48, 0.2);
 
   /* Map hex colors (used in leaflet) */
-  --cis-hex-green: #00c853;
-  --cis-hex-lime: #aeea00;
-  --cis-hex-yellow: #ffd600;
-  --cis-hex-orange: #ff6d00;
-  --cis-hex-red: #d50000;
+  --cis-hex-green: #34c759;
+  --cis-hex-lime: #a6e22e;
+  --cis-hex-yellow: #ffcc00;
+  --cis-hex-orange: #ff9500;
+  --cis-hex-red: #ff3b30;
 
   /* ── Text ─────────────────────────────────────────────────── */
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-primary: #1c1c1e;
+  --text-secondary: #8e8e93;
+  --text-muted: #aeaeb2;
   --text-inverse: #ffffff;
 
-  /* ── Borders & Shadows ────────────────────────────────────── */
-  --border: #e5e7eb;
-  --border-focus: #3b82f6;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  /* ── Borders & Shadows (Apple Soft & Glassy) ─────────────── */
+  --border: rgba(0, 0, 0, 0.05);
+  --border-focus: #007aff;
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 15px 45px rgba(0, 0, 0, 0.08);
 
-  /* ── Radius / Spacing ─────────────────────────────────────── */
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* ── Radius / Spacing (iOS Squircle / High Rounded) ───────── */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
 
   /* ── Typography ───────────────────────────────────────────── */
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font: 'Outfit', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* ── Transitions ──────────────────────────────────────────── */
-  --transition: 0.18s ease;
-  --transition-slow: 0.3s ease;
+  --transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
@@ -539,6 +540,8 @@ body {
 }
 
 .leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow-lg) !important;
   border: 1px solid var(--border) !important;
