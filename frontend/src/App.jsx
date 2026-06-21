@@ -14,7 +14,7 @@
  * API hooks are called here and data is distributed to children.
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import './App.css'
 
 // Leaflet CSS is loaded via CDN <link> in index.html
@@ -55,11 +55,11 @@ const DEFAULT_FILTERS = {
 
 // ── Analytics tabs ──────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'trend',       label: '📈 CIS Trend'      },
-  { id: 'vehicles',    label: '🚗 Vehicle Mix'     },
-  { id: 'predictions', label: '🔮 Upcoming Hotspots' },
-  { id: 'offenders',   label: '👮 Repeat Offenders' },
-  { id: 'challan',     label: '⚖️ Challan'          },
+  { id: 'trend',       label: 'CIS Trend'        },
+  { id: 'vehicles',    label: 'Vehicle Mix'       },
+  { id: 'predictions', label: 'Upcoming Hotspots' },
+  { id: 'offenders',   label: 'Repeat Offenders'  },
+  { id: 'challan',     label: 'Challan'           },
 ]
 
 // ── Main App ────────────────────────────────────────────────────────────────
@@ -73,6 +73,44 @@ export default function App() {
 
   // Analytics tab
   const [activeTab, setActiveTab] = useState('trend')
+
+  // Drag-resize: track analytics panel height
+  const ANALYTICS_MIN = 120
+  const ANALYTICS_MAX = 420
+  const ANALYTICS_DEFAULT = 190
+  const [analyticsHeight, setAnalyticsHeight] = useState(ANALYTICS_DEFAULT)
+  const dragRef = useRef(null)
+  const isDragging = useRef(false)
+  const startY = useRef(0)
+  const startH = useRef(0)
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!isDragging.current) return
+      const delta = startY.current - (e.clientY ?? e.touches?.[0]?.clientY ?? startY.current)
+      const newH = Math.min(ANALYTICS_MAX, Math.max(ANALYTICS_MIN, startH.current + delta))
+      setAnalyticsHeight(newH)
+    }
+    const onUp = () => { isDragging.current = false; document.body.style.cursor = '' }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    window.addEventListener('touchmove', onMove)
+    window.addEventListener('touchend', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend', onUp)
+    }
+  }, [])
+
+  const startDrag = useCallback((e) => {
+    isDragging.current = true
+    startY.current = e.clientY ?? e.touches?.[0]?.clientY
+    startH.current = analyticsHeight
+    document.body.style.cursor = 'ns-resize'
+    e.preventDefault()
+  }, [analyticsHeight])
 
   // Build API filter params from UI filter state + slider hour
   const apiFilters = useMemo(() => ({
@@ -146,7 +184,7 @@ export default function App() {
         {/* Centre: Map + Analytics bottom */}
         <div className="map-analytics-col">
           {/* Map */}
-          <div className="map-wrapper">
+          <div className="map-wrapper" style={{ flex: 1, minHeight: 0 }}>
             <TrafficMapWithControls
               heatmapCells={heatmapCells}
               hotspots={hotspots}
@@ -158,8 +196,26 @@ export default function App() {
             />
           </div>
 
+          {/* Drag handle */}
+          <div
+            ref={dragRef}
+            onMouseDown={startDrag}
+            onTouchStart={startDrag}
+            title="Drag to resize map / analytics panel"
+            style={{
+              height: 6, cursor: 'ns-resize', flexShrink: 0,
+              background: 'var(--border)', position: 'relative',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--blue-500)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--border)'}
+          >
+            <div style={{ width: 32, height: 3, borderRadius: 2, background: 'var(--text-muted)', opacity: 0.5 }} />
+          </div>
+
           {/* Analytics tabs — bottom panel */}
-          <div className="analytics-bottom">
+          <div className="analytics-bottom" style={{ height: analyticsHeight, flexShrink: 0 }}>
             {/* Tab bar */}
             <div className="tab-nav" role="tablist">
               {TABS.map(tab => (

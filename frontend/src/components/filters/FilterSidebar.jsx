@@ -16,7 +16,7 @@ const TIME_SLOTS = [
   { label: '4 AM – 8 AM',   start: 4,  end: 8,  id: 'early'   },
   { label: '8 AM – 12 PM',  start: 8,  end: 12, id: 'morning' },
   { label: '12 PM – 4 PM',  start: 12, end: 16, id: 'noon'    },
-  { label: '4 PM – 8 PM ⚡', start: 16, end: 20, id: 'peak'    },
+  { label: '4 PM – 8 PM',   start: 16, end: 20, id: 'peak'    },
   { label: '8 PM – 12 AM',  start: 20, end: 23, id: 'evening' },
 ]
 
@@ -93,7 +93,7 @@ export function FilterSidebar({ filters, onFiltersChange, policeStations = [] })
       <div className="sidebar-section" style={{ borderBottom: '2px solid var(--border)' }}>
         <div className="flex items-center justify-between">
           <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
-            🔍 Filters
+            Filters
           </div>
           {hasActiveFilters && (
             <button
@@ -120,7 +120,7 @@ export function FilterSidebar({ filters, onFiltersChange, policeStations = [] })
 
       {/* Time Slots */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title" style={{ marginBottom: 10 }}>⏰ Time Range</div>
+        <div className="sidebar-section-title" style={{ marginBottom: 10 }}>Time Range</div>
         <div className="slot-grid">
           {TIME_SLOTS.map(slot => (
             <button
@@ -149,7 +149,7 @@ export function FilterSidebar({ filters, onFiltersChange, policeStations = [] })
           role="button"
           aria-expanded={vehiclesOpen}
         >
-          <div className="sidebar-section-title">🚗 Vehicle Type</div>
+          <div className="sidebar-section-title">Vehicle Type</div>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{vehiclesOpen ? '▲' : '▼'}</span>
         </div>
         {vehiclesOpen && (
@@ -162,7 +162,7 @@ export function FilterSidebar({ filters, onFiltersChange, policeStations = [] })
                   onChange={() => toggleVehicle(v)}
                   aria-label={`Filter by ${v}`}
                 />
-                <span>{VEHICLE_ICONS[v] ?? '🚘'} {titleCase(v)}</span>
+                <span>{titleCase(v)}</span>
               </label>
             ))}
           </div>
@@ -177,7 +177,7 @@ export function FilterSidebar({ filters, onFiltersChange, policeStations = [] })
           role="button"
           aria-expanded={violationsOpen}
         >
-          <div className="sidebar-section-title">⚠️ Violation Type</div>
+          <div className="sidebar-section-title">Violation Type</div>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{violationsOpen ? '▲' : '▼'}</span>
         </div>
         {violationsOpen && (
@@ -205,7 +205,7 @@ export function FilterSidebar({ filters, onFiltersChange, policeStations = [] })
           role="button"
           aria-expanded={stationOpen}
         >
-          <div className="sidebar-section-title">🏢 Police Station</div>
+          <div className="sidebar-section-title">Police Station</div>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{stationOpen ? '▲' : '▼'}</span>
         </div>
         {stationOpen && (

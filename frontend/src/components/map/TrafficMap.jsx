@@ -241,7 +241,6 @@ export function TrafficMap({
       {/* CIS Legend overlay (bottom-left) */}
       <div style={{
         position: 'absolute', bottom: 60, left: 16, zIndex: 900,
-        pointerEvents: 'none',
       }}>
         <CISLegend />
       </div>
@@ -366,7 +365,7 @@ export function TrafficMapWithControls(props) {
 
       {/* CIS Legend */}
       <div style={{
-        position: 'absolute', bottom: 60, left: 16, zIndex: 900, pointerEvents: 'none',
+        position: 'absolute', bottom: 60, left: 16, zIndex: 900,
       }}>
         <CISLegend />
       </div>
