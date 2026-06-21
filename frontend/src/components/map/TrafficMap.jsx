@@ -25,7 +25,7 @@ import {
   Popup, useMap, Marker, Polygon, Tooltip
 } from 'react-leaflet'
 import L from 'leaflet'
-import { getCISHex, getEnforcementAction } from '../../utils/cis'
+import { getCISHex, HEATMAP_GRADIENT, getEnforcementAction } from '../../utils/cis'
 import { formatNumber, vehicleLabel } from '../../utils/format'
 import { CISBadge } from '../common'
 import { CISLegend } from './CISLegend'
@@ -35,42 +35,45 @@ import { TimeSlider } from './TimeSlider'
 const BENGALURU_CENTER = [12.9716, 77.5946]
 const DEFAULT_ZOOM = 12
 
-// ── Hexagonal Grid Layer (shades coordinates like AQI maps) ───────────────
-function HexagonalGridLayer({ cells = [] }) {
-  return (
-    <>
-      {cells.map(cell => (
-        cell.boundary ? (
-          <Polygon
-            key={cell.cell_id}
-            positions={cell.boundary}
-            pathOptions={{
-              fillColor: getCISHex(cell.avg_cis),
-              fillOpacity: 0.4,
-              color: 'rgba(255, 255, 255, 0.45)',
-              weight: 0.5,
-            }}
-            eventHandlers={{
-              mouseover: (e) => {
-                e.target.setStyle({ fillOpacity: 0.65, weight: 1.2, color: '#ffffff' });
-              },
-              mouseout: (e) => {
-                e.target.setStyle({ fillOpacity: 0.4, weight: 0.5, color: 'rgba(255, 255, 255, 0.45)' });
-              }
-            }}
-          >
-            <Tooltip sticky>
-              <div style={{ fontFamily: 'var(--font)', fontSize: 11, padding: '2px 4px' }}>
-                <strong>Zone: {cell.cell_id}</strong><br />
-                Avg CIS: <strong style={{ color: getCISHex(cell.avg_cis) }}>{Math.round(cell.avg_cis)}</strong> ({cell.cis_label})<br />
-                Violations: <strong>{cell.violation_count}</strong>
-              </div>
-            </Tooltip>
-          </Polygon>
-        ) : null
-      ))}
-    </>
-  )
+// ── Heatmap Layer (uses leaflet.heat for smooth AQI-style transitions) ──
+function HeatmapLayer({ cells = [] }) {
+  const map = useMap()
+  const layerRef = useRef(null)
+
+  useEffect(() => {
+    if (!map || !window.L?.heatLayer) return
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current)
+    }
+
+    // Convert cell coordinates and average CIS values into heatmap points
+    // [lat, lng, weight (intensity 0.0 - 1.0)]
+    const points = cells.map(c => [
+      c.latitude, 
+      c.longitude, 
+      (c.avg_cis ?? 0) / 100.0
+    ])
+
+    if (points.length === 0) return
+
+    // Create a smooth transition overlay
+    layerRef.current = window.L.heatLayer(points, {
+      radius: 65,      // Large radius for smooth blending between blocks
+      blur: 40,        // High blur to merge hexagonal cell points smoothly
+      maxZoom: 15,
+      max: 1.0,
+      gradient: HEATMAP_GRADIENT,
+      minOpacity: 0.25,
+    }).addTo(map)
+
+    return () => {
+      if (layerRef.current && map) {
+        try { map.removeLayer(layerRef.current) } catch { }
+      }
+    }
+  }, [map, cells])
+
+  return null
 }
 
 // ── Fly-to selected hotspot ────────────────────────────────────────────────
@@ -187,8 +190,8 @@ export function TrafficMap({
           maxZoom={20}
         />
 
-        {/* CIS Heatmap overlay (Solid H3 Hexagonal polygons) */}
-        <HexagonalGridLayer cells={heatmapCells} />
+        {/* CIS Heatmap overlay (Smooth interpolated AQI style) */}
+        <HeatmapLayer cells={heatmapCells} />
 
         {/* Fly to selected hotspot */}
         {selectedHotspot && <FlyToHotspot hotspot={selectedHotspot} />}
@@ -312,7 +315,7 @@ export function TrafficMapWithControls(props) {
           subdomains="abcd"
           maxZoom={20}
         />
-        <HexagonalGridLayer cells={props.heatmapCells ?? []} />
+        <HeatmapLayer cells={props.heatmapCells ?? []} />
         {props.selectedHotspot && <FlyToHotspot hotspot={props.selectedHotspot} />}
 
         {(props.violations ?? []).slice(0, 400).map((v, i) => (
