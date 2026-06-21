@@ -12,7 +12,7 @@ Returns:
 from fastapi import APIRouter
 import pandas as pd
 
-from app.data_loader import load_violations
+from app.data_loader import load_scored_violations
 
 router = APIRouter()
 
@@ -22,7 +22,7 @@ _df: pd.DataFrame | None = None
 def _get_df() -> pd.DataFrame:
     global _df
     if _df is None:
-        _df = load_violations()
+        _df = load_scored_violations()
     return _df
 
 
