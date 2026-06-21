@@ -12,6 +12,7 @@ venv/
 env/
 
 # Data files (large)
+data/*.csv
 data/raw/*.csv
 data/raw/*.zip
 data/processed/*.parquet
@@ -42,4 +43,5 @@ Thumbs.db
 
 # Cache
 .cache/
+cache/
 *.log
