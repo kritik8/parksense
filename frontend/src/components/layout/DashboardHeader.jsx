@@ -1,23 +1,53 @@
 /**
  * Dashboard Header
- * Shows: Logo | Subtitle | Search bar | Live badge | Last-updated | Refresh
+ * Shows: Logo | Subtitle | Search bar | Digital Clock | Live badge | Last-updated | Refresh
  */
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { formatLastUpdated } from '../../utils/format'
+import logo from '../../assets/logo.png'
+
+function DigitalClock() {
+  const [time, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const pad = n => String(n).padStart(2, '0')
+  const h = time.getHours()
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 6,
+      background: 'var(--bg-input)', borderRadius: 8,
+      padding: '4px 10px', border: '1px solid var(--border)',
+    }}>
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: 0.5 }}>IST</span>
+      <span style={{
+        fontFamily: "'Courier New', monospace",
+        fontSize: 15, fontWeight: 700,
+        color: 'var(--text-primary)', letterSpacing: 1,
+      }}>
+        {pad(h12)}:{pad(time.getMinutes())}:{pad(time.getSeconds())}
+      </span>
+      <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--blue-600)' }}>{ampm}</span>
+    </div>
+  )
+}
 
 export function DashboardHeader({ lastUpdated, onRefresh }) {
   return (
     <header className="app-header">
       {/* Logo */}
       <div className="flex items-center gap-8">
-        <div style={{
-          width: 30, height: 30, borderRadius: 8,
-          background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 15, flexShrink: 0, boxShadow: '0 2px 8px rgba(29,78,216,0.3)',
-        }}>
-          🅿️
-        </div>
+        <img
+          src={logo}
+          alt="ParkSense AI Logo"
+          style={{ height: 38, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
+        />
         <div>
           <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.2 }}>
             ParkSense <span style={{ color: 'var(--blue-600)' }}>AI</span>
@@ -30,7 +60,7 @@ export function DashboardHeader({ lastUpdated, onRefresh }) {
 
       {/* Search */}
       <div className="header-search" style={{ marginLeft: 24 }}>
-        <span className="header-search-icon">🔍</span>
+        <span className="header-search-icon" style={{ fontSize: 12 }}>&#9906;</span>
         <input
           type="search"
           className="header-search-input"
@@ -41,9 +71,12 @@ export function DashboardHeader({ lastUpdated, onRefresh }) {
 
       {/* Right side */}
       <div className="header-right">
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+        {/* Digital Clock */}
+        <DigitalClock />
+
+        {/* <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           Updated {formatLastUpdated(lastUpdated)}
-        </span>
+        </span> */}
 
         <button
           className="btn btn-secondary btn-sm"
@@ -52,25 +85,12 @@ export function DashboardHeader({ lastUpdated, onRefresh }) {
           aria-label="Refresh dashboard data"
           id="header-refresh-btn"
         >
-          ↺ Refresh
+          &#8634; Refresh
         </button>
 
         <div className="live-badge">
           <span className="live-dot" />
           Live
-        </div>
-
-        {/* Profile placeholder */}
-        <div style={{
-          width: 32, height: 32, borderRadius: '50%',
-          background: 'var(--blue-100)', color: 'var(--blue-600)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14, fontWeight: 700, cursor: 'pointer',
-          border: '2px solid var(--blue-200, #bfdbfe)',
-        }}
-          title="Profile / Settings"
-        >
-          TC
         </div>
       </div>
     </header>
