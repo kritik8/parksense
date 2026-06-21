@@ -13,6 +13,7 @@ Real CSV columns (24 total):
 """
 import ast
 import os
+import threading
 import pandas as pd
 
 BASE_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -118,25 +119,45 @@ def load_violations(force_raw: bool = False) -> pd.DataFrame:
     return df
 
 
+_SCORED_CACHE = None
+_CACHE_LOCK = threading.Lock()
+
+
 def load_scored_violations(force_rescore: bool = False) -> pd.DataFrame:
     """
     Load violations with CIS scores pre-computed.
-    Uses a separate Parquet cache (violations_scored.parquet).
-    On first call, runs score_dataframe() which takes ~20-30s for 298K rows.
+    Uses an in-memory cache, backed by a Parquet file.
+    A threading lock prevents multiple concurrent requests from
+    trying to parse the 300MB CSV at the exact same time.
 
     Args:
         force_rescore: if True, recompute CIS even if cache exists.
     """
-    if not force_rescore and os.path.exists(SCORED_PATH):
-        df = pd.read_parquet(SCORED_PATH)
-        print(f"[INFO] Loaded {len(df):,} scored violations from cache.")
+    global _SCORED_CACHE
+
+    # Fast path if already in memory
+    if not force_rescore and _SCORED_CACHE is not None:
+        return _SCORED_CACHE
+
+    with _CACHE_LOCK:
+        # Check memory again after acquiring lock (double-checked locking)
+        if not force_rescore and _SCORED_CACHE is not None:
+            return _SCORED_CACHE
+
+        if not force_rescore and os.path.exists(SCORED_PATH):
+            _SCORED_CACHE = pd.read_parquet(SCORED_PATH)
+            print(f"[INFO] Loaded {len(_SCORED_CACHE):,} scored violations from cache.")
+            return _SCORED_CACHE
+
+        print("[INFO] Computing CIS scores for all violations (~20-30s)...")
+        # Import here to avoid circular import at module level
+        from app.cis_batch import score_dataframe
+        df = load_violations()
+        df = score_dataframe(df)
+        os.makedirs(PROCESSED_DIR, exist_ok=True)
+        df.to_parquet(SCORED_PATH, index=False)
+        print(f"[INFO] Scored {len(df):,} violations. Cached to {SCORED_PATH}")
+
+        _SCORED_CACHE = df
         return df
 
-    print("[INFO] Computing CIS scores for all violations (~20-30s)...")
-    # Import here to avoid circular import at module level
-    from app.cis_batch import score_dataframe
-    df = load_violations()
-    df = score_dataframe(df)
-    df.to_parquet(SCORED_PATH, index=False)
-    print(f"[INFO] Scored {len(df):,} violations. Cached to {SCORED_PATH}")
-    return df
