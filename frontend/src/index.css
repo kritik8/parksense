@@ -576,6 +576,9 @@ body {
 /* ── Leaflet overrides ──────────────────────────────────────── */
 .leaflet-container {
   font-family: var(--font) !important;
+}
+
+.leaflet-tile-container {
   filter: var(--map-tiles-filter) !important;
   transition: filter var(--transition-slow);
 }
