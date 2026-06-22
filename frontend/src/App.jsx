@@ -64,6 +64,20 @@ const TABS = [
 
 // ── Main App ────────────────────────────────────────────────────────────────
 export default function App() {
+  // Theme state (Lifted up for full app mode)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('parksense-theme') || 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('parksense-theme', theme)
+  }, [theme])
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }, [])
+
   // Filter state (lifted up — shared across sidebar, map, hotspots)
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
 
@@ -168,6 +182,8 @@ export default function App() {
         lastUpdated={stats?.date_range?.max}
         onRefresh={handleRefresh}
         usingMock={usingMock}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Stats Bar */}

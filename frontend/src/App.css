@@ -19,7 +19,7 @@
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: var(--bg-sidebar) !important;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--border);
@@ -34,7 +34,7 @@
   align-items: center;
   gap: 0;
   padding: 0 16px;
-  background: rgba(255, 255, 255, 0.7) !important;
+  background: var(--bg-sidebar) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -53,7 +53,7 @@
 .filter-sidebar {
   width: 236px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.4) !important;
+  background: var(--bg-sidebar) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
@@ -94,7 +94,7 @@
 .hotspot-sidebar {
   width: 296px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.5) !important;
+  background: var(--bg-sidebar) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-left: 1px solid var(--border);
@@ -221,7 +221,7 @@
   left: 0;
   right: 0;
   height: 52px;
-  background: rgba(255,255,255,0.95);
+  background: var(--bg-sidebar);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(8px);
   display: flex;
@@ -543,7 +543,7 @@
 .tab-nav {
   display: flex;
   border-bottom: 1px solid var(--border);
-  background: #fff;
+  background: var(--bg-secondary) !important;
   flex-shrink: 0;
   overflow-x: auto;
   /* hide scrollbar on tab nav */
@@ -571,7 +571,7 @@
 .analytics-bottom {
   height: 190px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.65) !important;
+  background: var(--bg-sidebar) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);

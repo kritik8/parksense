@@ -38,7 +38,7 @@ function DigitalClock() {
   )
 }
 
-export function DashboardHeader({ lastUpdated, onRefresh, usingMock }) {
+export function DashboardHeader({ lastUpdated, onRefresh, usingMock, theme, onToggleTheme }) {
   return (
     <header className="app-header">
       {/* Logo */}
@@ -77,6 +77,16 @@ export function DashboardHeader({ lastUpdated, onRefresh, usingMock }) {
         {/* <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           Updated {formatLastUpdated(lastUpdated)}
         </span> */}
+
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={onToggleTheme}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          aria-label="Toggle dark mode"
+          id="header-theme-btn"
+        >
+          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+        </button>
 
         <button
           className="btn btn-secondary btn-sm"

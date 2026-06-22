@@ -20,9 +20,10 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null
   return (
     <div style={{
-      background: '#fff', border: '1px solid var(--border)',
+      background: 'var(--bg-secondary, #fff)', border: '1px solid var(--border)',
       borderRadius: 8, padding: '8px 12px', boxShadow: 'var(--shadow)',
-      fontSize: 12,
+      fontSize: 12, fontFamily: 'var(--font), sans-serif',
+      color: 'var(--text-primary)',
     }}>
       <b>{payload[0]?.payload?.type}</b>
       <div style={{ color: 'var(--blue-600)' }}>{formatNumber(payload[0]?.value)} violations</div>
