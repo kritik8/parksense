@@ -47,4 +47,4 @@ app.include_router(simulate_router,   prefix="/api", tags=["Simulation"])
 # ── Health check ───────────────────────────────────────────────────────────
 @app.get("/", tags=["Health"])
 def root():
-    return {"status": "ok", "service": "ParkSense AI API", "docs": "/docs"}
+    return {"status": "running"}

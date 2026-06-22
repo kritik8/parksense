@@ -61,6 +61,10 @@ def detect_fleets(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df["fleet_prefix"] = df["vehicle_number"].str[:6]
         
+    if "h3_cell" not in df.columns:
+        import h3
+        df["h3_cell"] = [h3.latlng_to_cell(lat, lng, 8) for lat, lng in zip(df["latitude"], df["longitude"])]
+        
     prefix_counts = df.groupby("fleet_prefix")["vehicle_number"].nunique()
     fleet_prefixes = prefix_counts[prefix_counts >= 3].index
     fleet_df = df[df["fleet_prefix"].isin(fleet_prefixes)]

@@ -145,9 +145,13 @@ def load_scored_violations(force_rescore: bool = False) -> pd.DataFrame:
             return _SCORED_CACHE
 
         if not force_rescore and os.path.exists(SCORED_PATH):
-            _SCORED_CACHE = pd.read_parquet(SCORED_PATH)
-            print(f"[INFO] Loaded {len(_SCORED_CACHE):,} scored violations from cache.")
-            return _SCORED_CACHE
+            df_temp = pd.read_parquet(SCORED_PATH)
+            if "cis_score" in df_temp.columns and not df_temp["cis_score"].isna().all():
+                _SCORED_CACHE = df_temp
+                print(f"[INFO] Loaded {len(_SCORED_CACHE):,} scored violations from cache.")
+                return _SCORED_CACHE
+            else:
+                print("[WARN] Scored violations cache is invalid or missing cis_score. Forcing recomputation...")
 
         print("[INFO] Computing CIS scores for all violations (~20-30s)...")
         # Import here to avoid circular import at module level

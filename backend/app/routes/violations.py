@@ -21,13 +21,13 @@ from typing import Optional
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 
-from app.data_loader import load_violations
+from app.data_loader import load_scored_violations
 
 router = APIRouter()
 
 # ---------------------------------------------------------------------------
 # Load dataset once at module import — cached in memory for the API lifetime.
-# On first call this auto-builds data/processed/violations_clean.parquet.
+# On first call this auto-builds data/processed/violations_scored.parquet.
 # ---------------------------------------------------------------------------
 _df: pd.DataFrame | None = None
 
@@ -35,7 +35,7 @@ _df: pd.DataFrame | None = None
 def _get_df() -> pd.DataFrame:
     global _df
     if _df is None:
-        _df = load_violations()
+        _df = load_scored_violations()
     return _df
 
 

@@ -11,7 +11,7 @@ backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_dir not in sys.path:
     sys.path.append(backend_dir)
 
-from app.data_loader import load_violations
+from app.data_loader import load_scored_violations
 from ml.hotspot_forecast import build_features, train_model, predict_next_2h, MODEL_PATH
 from ml.offender_profiler import profile_offenders, detect_fleets
 from ml.sensor_audit import audit_sensor_health, poi_bias_report
@@ -24,7 +24,7 @@ def run_tests():
 
     # 1. Load Data
     print("\n[STEP 1] Loading violations data...")
-    df = load_violations()
+    df = load_scored_violations()
     print(f"Loaded {len(df)} rows. Columns: {list(df.columns)}")
 
     # 2. Build Features

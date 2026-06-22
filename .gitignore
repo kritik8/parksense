@@ -16,12 +16,14 @@ data/*.csv
 data/raw/*.csv
 data/raw/*.zip
 data/processed/*.parquet
+!data/processed/violations_scored.parquet
 *.pkl
 *.h5
 *.model
 
 # ML artifacts
 models/*.pkl
+!models/hotspot_lgbm.pkl
 models/*.joblib
 
 # Node
